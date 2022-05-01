@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/security
+            http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<http auto-config="false" use-expressions="true"
+		disable-url-rewriting="true">
+		<intercept-url pattern="/home" access="hasRole('ADMIN')" />
+		<intercept-url pattern="/home" access="hasRole('STAFF')" />
+		<intercept-url pattern="/admin/**"
+			access="hasRole('ADMIN')" />
+		<intercept-url pattern="/" access="hasRole('ADMIN')" />
+		
+		<access-denied-handler error-page="/deny" />
+		<form-login login-page="/login"
+			username-parameter="username" password-parameter="password"
+			login-processing-url="/j_spring_security_check"
+			authentication-success-handler-ref="customSuccessHandler"
+			authentication-failure-url="/login?incorrectAccount" />
+		<session-management
+			invalid-session-url="/login?sessionTimeout" />
+		<logout delete-cookies="JSESSIONID" />
+		<!-- <remember-me data-source-ref="dataSource" key="remember-me" remember-me-parameter="remember-me" 
+			token-validity-seconds="1296000" use-secure-cookie="true" /> -->
+
+		<remember-me key="uniqueAndSecret"
+			token-validity-seconds="1296000" />
+	</http>
+
+
+	<authentication-manager>
+		<authentication-provider
+			user-service-ref="customUserDetailsService">
+			<password-encoder ref="bcryptEncoder" />
+		</authentication-provider>
+	</authentication-manager>
+
+	<beans:bean id="bcryptEncoder"
+		class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+
+	<beans:bean id="customUserDetailsService"
+		class="spring.service.CustomUserDetailsService" />
+	<beans:bean id="customSuccessHandler"
+		class="spring.security.CustomSuccessHandler" />
+
+</beans:beans>
